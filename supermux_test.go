@@ -8,32 +8,112 @@ import (
 	"github.com/wayneashleyberry/superhttp"
 )
 
-func TestRoutePatternAndPathParam(t *testing.T) {
-	mux := superhttp.NewServeMux()
+func TestRoutePatternStoredInContext(t *testing.T) {
+	t.Parallel()
 
-	var routePattern string
-	var paramValue string
+	router := superhttp.NewServeMux()
+	expectedPattern := "/hello"
 
-	mux.GET("/user/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		routePattern = superhttp.RoutePattern(r)
-		paramValue = r.PathValue("id")
+	router.GET(expectedPattern, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got := superhttp.RoutePattern(r)
+		if got != expectedPattern {
+			t.Errorf("expected route pattern %q, got %q", expectedPattern, got)
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/user/123", nil)
-	w := httptest.NewRecorder()
-	mux.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodGet, "/hello", nil)
+	rec := httptest.NewRecorder()
 
-	resp := w.Result()
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
+	router.ServeHTTP(rec, req)
+
+	if rec.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
 	}
+}
 
-	if routePattern != "/user/{id}" {
-		t.Errorf("expected route pattern '/user/{id}', got '%s'", routePattern)
+func TestPathParamsFromStandardLibrary(t *testing.T) {
+	t.Parallel()
+
+	router := superhttp.NewServeMux()
+
+	router.GET("/users/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if id != "42" {
+			t.Errorf("expected path param id = 42, got %q", id)
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/users/42", nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	if rec.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
 	}
+}
 
-	if paramValue != "123" {
-		t.Errorf("expected path param '123', got '%s'", paramValue)
+func TestMiddlewareIsApplied(t *testing.T) {
+	t.Parallel()
+
+	router := superhttp.NewServeMux()
+	middlewareCalled := false
+
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			middlewareCalled = true
+			next.ServeHTTP(w, r)
+		})
+	})
+
+	router.GET("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	if !middlewareCalled {
+		t.Errorf("expected middleware to be called")
+	}
+	if rec.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
+	}
+}
+
+func TestGroupScopedMiddleware(t *testing.T) {
+	t.Parallel()
+
+	router := superhttp.NewServeMux()
+	var order []string
+
+	router.Group("/api", func(api *superhttp.ServeMux) {
+		api.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				order = append(order, "group")
+				next.ServeHTTP(w, r)
+			})
+		})
+
+		api.GET("/hello", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			order = append(order, "handler")
+			w.WriteHeader(http.StatusOK)
+		}))
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/hello", nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	if got, want := order, []string{"group", "handler"}; len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
+		t.Errorf("expected middleware and handler order %v, got %v", want, got)
+	}
+	if rec.Result().StatusCode != http.StatusOK {
+		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
 	}
 }
