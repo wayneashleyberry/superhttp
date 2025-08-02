@@ -57,73 +57,38 @@ func methodHandler(pattern string, handler http.Handler) http.Handler {
 }
 
 // GET registers a handler for HTTP GET requests with the given pattern.
-func (r *ServeMux) GET(pattern string, handler http.Handler) {
-	r.handle(http.MethodGet, pattern, handler)
+func (r *ServeMux) GET(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodGet, pattern, handlerFn)
 }
 
 // POST registers a handler for HTTP POST requests with the given pattern.
-func (r *ServeMux) POST(pattern string, handler http.Handler) {
-	r.handle(http.MethodPost, pattern, handler)
+func (r *ServeMux) POST(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodPost, pattern, handlerFn)
 }
 
 // PUT registers a handler for HTTP PUT requests with the given pattern.
-func (r *ServeMux) PUT(pattern string, handler http.Handler) {
-	r.handle(http.MethodPut, pattern, handler)
+func (r *ServeMux) PUT(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodPut, pattern, handlerFn)
 }
 
 // PATCH registers a handler for HTTP PATCH requests with the given pattern.
-func (r *ServeMux) PATCH(pattern string, handler http.Handler) {
-	r.handle(http.MethodPatch, pattern, handler)
+func (r *ServeMux) PATCH(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodPatch, pattern, handlerFn)
 }
 
 // DELETE registers a handler for HTTP DELETE requests with the given pattern.
-func (r *ServeMux) DELETE(pattern string, handler http.Handler) {
-	r.handle(http.MethodDelete, pattern, handler)
+func (r *ServeMux) DELETE(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodDelete, pattern, handlerFn)
 }
 
 // HEAD registers a handler for HTTP HEAD requests with the given pattern.
-func (r *ServeMux) HEAD(pattern string, handler http.Handler) {
-	r.handle(http.MethodHead, pattern, handler)
+func (r *ServeMux) HEAD(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodHead, pattern, handlerFn)
 }
 
 // OPTIONS registers a handler for HTTP OPTIONS requests with the given pattern.
-func (r *ServeMux) OPTIONS(pattern string, handler http.Handler) {
-	r.handle(http.MethodOptions, pattern, handler)
-}
-
-// GETFunc regisFers a handler function for HTTP GET requests with the given pattern.
-func (r *ServeMux) GETFunc(pattern string, fn http.HandlerFunc) {
-	r.GET(pattern, fn)
-}
-
-// POSTFunc registers a handler function for HTTP POST requests with the given pattern.
-func (r *ServeMux) POSTFunc(pattern string, fn http.HandlerFunc) {
-	r.POST(pattern, fn)
-}
-
-// PATCHFunc registers a handler function for HTTP PATCH requests with the given pattern.
-func (r *ServeMux) PATCHFunc(pattern string, fn http.HandlerFunc) {
-	r.PATCH(pattern, fn)
-}
-
-// PUTFunc regisFers a handler function for HTTP PUT requests with the given pattern.
-func (r *ServeMux) PUTFunc(pattern string, fn http.HandlerFunc) {
-	r.PUT(pattern, fn)
-}
-
-// DELETEFunc registers a handler function for HTTP DELETE requests with the given pattern.
-func (r *ServeMux) DELETEFunc(pattern string, fn http.HandlerFunc) {
-	r.DELETE(pattern, fn)
-}
-
-// HEADFunc registers a handler function for HTTP HEAD requests with the given pattern.
-func (r *ServeMux) HEADFunc(pattern string, fn http.HandlerFunc) {
-	r.HEAD(pattern, fn)
-}
-
-// OPTIONSFunc registers a handler function for HTTP OPTIONS requests with the given pattern.
-func (r *ServeMux) OPTIONSFunc(pattern string, fn http.HandlerFunc) {
-	r.OPTIONS(pattern, fn)
+func (r *ServeMux) OPTIONS(pattern string, handlerFn http.HandlerFunc) {
+	r.handle(http.MethodOptions, pattern, handlerFn)
 }
 
 // Use registers middleware to be applied to all routes handled by this ServeMux.
@@ -142,18 +107,18 @@ func (r *ServeMux) Group(prefix string, fnGroup func(gr *ServeMux)) {
 	fnGroup(group)
 }
 
-func (r *ServeMux) handle(method string, pattern string, handler http.Handler) {
+func (r *ServeMux) handle(method string, pattern string, handlerFn http.HandlerFunc) {
 	fullPattern := r.prefix + pattern
-	wrapped := methodHandler(fullPattern, applyMiddleware(handler, r.middleware...))
+	wrapped := methodHandler(fullPattern, applyMiddleware(handlerFn, r.middleware...))
 	r.mux.Handle(method+" "+fullPattern, wrapped)
 }
 
-func applyMiddleware(h http.Handler, middleware ...Middleware) http.Handler {
+func applyMiddleware(h http.HandlerFunc, middleware ...Middleware) http.Handler {
+	var handler http.Handler = h
 	for i := len(middleware) - 1; i >= 0; i-- {
-		h = middleware[i](h)
+		handler = middleware[i](handler)
 	}
-
-	return h
+	return handler
 }
 
 // RoutePattern retrieves the route pattern from the request context.
