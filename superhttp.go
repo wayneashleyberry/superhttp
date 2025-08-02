@@ -49,13 +49,6 @@ func (r *ServeMux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.mux.ServeHTTP(w, req)
 }
 
-func methodHandler(pattern string, handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), RoutePatternKey, pattern)
-		handler.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
 // GET registers a handler for HTTP GET requests with the given pattern.
 func (r *ServeMux) GET(pattern string, handlerFn http.HandlerFunc) {
 	r.handle(http.MethodGet, pattern, handlerFn)
@@ -109,7 +102,11 @@ func (r *ServeMux) Group(prefix string, fnGroup func(gr *ServeMux)) {
 
 func (r *ServeMux) handle(method string, pattern string, handlerFn http.HandlerFunc) {
 	fullPattern := r.prefix + pattern
-	wrapped := methodHandler(fullPattern, applyMiddleware(handlerFn, r.middleware...))
+	mwHandler := applyMiddleware(handlerFn, r.middleware...)
+	wrapped := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		ctx := context.WithValue(req.Context(), RoutePatternKey, fullPattern)
+		mwHandler.ServeHTTP(w, req.WithContext(ctx))
+	})
 	r.mux.Handle(method+" "+fullPattern, wrapped)
 }
 
