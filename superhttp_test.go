@@ -19,6 +19,7 @@ func TestRoutePatternStoredInContext(t *testing.T) {
 		if got != expectedPattern {
 			t.Errorf("expected route pattern %q, got %q", expectedPattern, got)
 		}
+
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -42,6 +43,7 @@ func TestPathParamsFromStandardLibrary(t *testing.T) {
 		if id != "42" {
 			t.Errorf("expected path param id = 42, got %q", id)
 		}
+
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -64,11 +66,12 @@ func TestMiddlewareIsApplied(t *testing.T) {
 	router.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			middlewareCalled = true
+
 			next.ServeHTTP(w, r)
 		})
 	})
 
-	router.GET("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.GET("/ping", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -80,6 +83,7 @@ func TestMiddlewareIsApplied(t *testing.T) {
 	if !middlewareCalled {
 		t.Errorf("expected middleware to be called")
 	}
+
 	if rec.Result().StatusCode != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
 	}
@@ -89,18 +93,21 @@ func TestGroupScopedMiddleware(t *testing.T) {
 	t.Parallel()
 
 	router := superhttp.NewServeMux()
+
 	var order []string
 
 	router.Group("/api", func(api *superhttp.ServeMux) {
 		api.Use(func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				order = append(order, "group")
+
 				next.ServeHTTP(w, r)
 			})
 		})
 
-		api.GET("/hello", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.GET("/hello", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			order = append(order, "handler")
+
 			w.WriteHeader(http.StatusOK)
 		}))
 	})
@@ -110,9 +117,12 @@ func TestGroupScopedMiddleware(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
-	if got, want := order, []string{"group", "handler"}; len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
+	if got, want := order, []string{"group", "handler"}; len(got) != len(want) ||
+		got[0] != want[0] ||
+		got[1] != want[1] {
 		t.Errorf("expected middleware and handler order %v, got %v", want, got)
 	}
+
 	if rec.Result().StatusCode != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Result().StatusCode)
 	}
