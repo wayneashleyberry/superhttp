@@ -7,9 +7,9 @@
 // extends the Go 1.22+ http.ServeMux, aiming to make structured routing and
 // middleware composition more ergonomic.
 //
-// This package exists to bridge functionality that may eventually be included
-// in the Go standard library. If and when those capabilities are added, this
-// package should become unnecessary.
+// This package exists to bridge functionality that will hopefully be included
+// in the Go standard library one day. If and when those capabilities are added,
+// this package should become unnecessary.
 package superhttp
 
 import (

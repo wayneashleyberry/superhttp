@@ -1,3 +1,9 @@
+Package `superhttp` provides a thin, idiomatic layer over Go's standard net/http, adding missing features such as type-safe HTTP method handlers, middleware chaining, route groups with scoped middleware, and request context enrichment with route metadata.
+
+It is designed as a minimal, zero-dependency shim that complements and extends the [Go 1.22+ `http.ServeMux`](https://go.dev/blog/routing-enhancements), aiming to make structured routing and middleware composition more ergonomic.
+
+This package exists to bridge functionality that will hopefully be included in the Go standard library one day. If and when those capabilities are added, this package should become unnecessary.
+
 ### Example
 
 ```go
