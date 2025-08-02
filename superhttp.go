@@ -71,6 +71,11 @@ func (r *ServeMux) PUT(pattern string, handler http.Handler) {
 	r.handle(http.MethodPut, pattern, handler)
 }
 
+// PATCH registers a handler for HTTP PATCH requests with the given pattern.
+func (r *ServeMux) PATCH(pattern string, handler http.Handler) {
+	r.handle(http.MethodPatch, pattern, handler)
+}
+
 // DELETE registers a handler for HTTP DELETE requests with the given pattern.
 func (r *ServeMux) DELETE(pattern string, handler http.Handler) {
 	r.handle(http.MethodDelete, pattern, handler)
@@ -94,6 +99,11 @@ func (r *ServeMux) GETFunc(pattern string, fn http.HandlerFunc) {
 // POSTFunc registers a handler function for HTTP POST requests with the given pattern.
 func (r *ServeMux) POSTFunc(pattern string, fn http.HandlerFunc) {
 	r.POST(pattern, fn)
+}
+
+// PATCHFunc registers a handler function for HTTP PATCH requests with the given pattern.
+func (r *ServeMux) PATCHFunc(pattern string, fn http.HandlerFunc) {
+	r.PATCH(pattern, fn)
 }
 
 // PUTFunc regisFers a handler function for HTTP PUT requests with the given pattern.
