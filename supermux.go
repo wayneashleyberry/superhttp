@@ -86,6 +86,36 @@ func (r *ServeMux) OPTIONS(pattern string, handler http.Handler) {
 	r.handle(http.MethodOptions, pattern, handler)
 }
 
+// GETFunc regisFers a handler function for HTTP GET requests with the given pattern.
+func (r *ServeMux) GETFunc(pattern string, fn http.HandlerFunc) {
+	r.GET(pattern, fn)
+}
+
+// POSTFunc registers a handler function for HTTP POST requests with the given pattern.
+func (r *ServeMux) POSTFunc(pattern string, fn http.HandlerFunc) {
+	r.POST(pattern, fn)
+}
+
+// PUTFunc regisFers a handler function for HTTP PUT requests with the given pattern.
+func (r *ServeMux) PUTFunc(pattern string, fn http.HandlerFunc) {
+	r.PUT(pattern, fn)
+}
+
+// DELETEFunc registers a handler function for HTTP DELETE requests with the given pattern.
+func (r *ServeMux) DELETEFunc(pattern string, fn http.HandlerFunc) {
+	r.DELETE(pattern, fn)
+}
+
+// HEADFunc registers a handler function for HTTP HEAD requests with the given pattern.
+func (r *ServeMux) HEADFunc(pattern string, fn http.HandlerFunc) {
+	r.HEAD(pattern, fn)
+}
+
+// OPTIONSFunc registers a handler function for HTTP OPTIONS requests with the given pattern.
+func (r *ServeMux) OPTIONSFunc(pattern string, fn http.HandlerFunc) {
+	r.OPTIONS(pattern, fn)
+}
+
 // Use registers middleware to be applied to all routes handled by this ServeMux.
 func (r *ServeMux) Use(mw ...Middleware) {
 	r.middleware = append(r.middleware, mw...)
@@ -93,13 +123,13 @@ func (r *ServeMux) Use(mw ...Middleware) {
 
 // Group creates a new ServeMux with a prefix and applies the provided
 // middleware to all routes within that group.
-func (r *ServeMux) Group(prefix string, mux func(gr *ServeMux)) {
+func (r *ServeMux) Group(prefix string, fnGroup func(gr *ServeMux)) {
 	group := &ServeMux{
 		mux:        r.mux,
 		prefix:     r.prefix + prefix,
 		middleware: slices.Clone(r.middleware),
 	}
-	mux(group)
+	fnGroup(group)
 }
 
 func (r *ServeMux) handle(method string, pattern string, handler http.Handler) {
