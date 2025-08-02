@@ -4,6 +4,9 @@ It is designed as a minimal, zero-dependency shim that complements and extends t
 
 This package exists to bridge functionality that will hopefully be included in the Go standard library one day. If and when those capabilities are added, this package should become unnecessary.
 
+[![lint](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml)
+[![test](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml)
+
 ### Example
 
 ```go
