@@ -6,7 +6,7 @@
 
 ### Why?
 
-Package `superhttp` is designed as a minimal, zero-dependency shim that complements and extends the [Go 1.22+ `http.ServeMux`](https://go.dev/blog/routing-enhancements), aiming to make structured routing and middleware composition more ergonomic.
+Package `superhttp` is designed as a minimal, zero-dependency shim that complements and extends the [Go 1.22+ `http.ServeMux`](https://go.dev/blog/routing-enhancements), aiming to make structured routing and middleware composition more ergonomic. The aim is to have a developer experience more like [`chi`](https://github.com/go-chi/chi) or [`gin`](https://github.com/gin-gonic/gin), but with the underlying implementation still being the standard library.
 
 This package exists to bridge functionality that will hopefully be included in the Go standard library one day. If and when those capabilities are added, this package should become unnecessary.
 
