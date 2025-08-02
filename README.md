@@ -1,8 +1,9 @@
 > Package `superhttp` provides a thin, idiomatic layer over Go's standard net/http, adding missing features such as type-safe HTTP method handlers, middleware chaining, route groups with scoped middleware, and request context enrichment with route metadata.
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/wayneashleyberry/superhttp.svg)](https://pkg.go.dev/github.com/wayneashleyberry/superhttp)
-[![test](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml)
-[![lint](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml)
+[![Test](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/test.yaml)
+[![Lint](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml/badge.svg)](https://github.com/wayneashleyberry/superhttp/actions/workflows/lint.yaml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/wayneashleyberry/superhttp)](https://goreportcard.com/report/github.com/wayneashleyberry/superhttp)
 
 ### Why?
 
