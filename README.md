@@ -34,6 +34,9 @@ func main() {
 		api.GET("/users/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pattern := superhttp.RoutePattern(r)
 			fmt.Fprintf(w, "Pattern: %s", pattern)
+
+			id := r.PathValue("id")
+			fmt.Fprintf(w, "ID: %s", id)
 		}))
 	})
 
