@@ -14,13 +14,13 @@ func TestRoutePatternAndPathParam(t *testing.T) {
 	var routePattern string
 	var paramValue string
 
-	mux.GET("/hello/{name}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.GET("/user/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		routePattern = superhttp.RoutePattern(r)
-		paramValue = r.PathValue("name")
+		paramValue = r.PathValue("id")
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/hello/world", nil)
+	req := httptest.NewRequest(http.MethodGet, "/user/123", nil)
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 
@@ -29,11 +29,11 @@ func TestRoutePatternAndPathParam(t *testing.T) {
 		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
 	}
 
-	if routePattern != "/hello/{name}" {
-		t.Errorf("expected route pattern '/hello/{name}', got '%s'", routePattern)
+	if routePattern != "/user/{id}" {
+		t.Errorf("expected route pattern '/user/{id}', got '%s'", routePattern)
 	}
 
-	if paramValue != "world" {
-		t.Errorf("expected path param 'world', got '%s'", paramValue)
+	if paramValue != "123" {
+		t.Errorf("expected path param '123', got '%s'", paramValue)
 	}
 }
