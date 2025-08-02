@@ -3,6 +3,7 @@ package superhttp
 import (
 	"context"
 	"net/http"
+	"slices"
 )
 
 type Middleware func(http.Handler) http.Handler
@@ -68,7 +69,7 @@ func (r *ServeMux) Group(prefix string, fn func(gr *ServeMux)) {
 	group := &ServeMux{
 		mux:        r.mux,
 		prefix:     r.prefix + prefix,
-		middleware: append([]Middleware{}, r.middleware...),
+		middleware: slices.Clone(r.middleware),
 	}
 	fn(group)
 }

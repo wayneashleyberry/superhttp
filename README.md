@@ -1,5 +1,10 @@
+### Usage
+
 ```go
 package main
+
+import "github.com/wayneashleyberry/superhttp"
+
 func main() {
     r := superhttp.NewServeMux()
 
@@ -19,6 +24,5 @@ func main() {
     })
 
     http.ListenAndServe(":8080", r)
-
 }
 ```
