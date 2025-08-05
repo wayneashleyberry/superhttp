@@ -115,6 +115,7 @@ func applyMiddleware(h http.HandlerFunc, middleware ...Middleware) http.Handler 
 	for i := len(middleware) - 1; i >= 0; i-- {
 		handler = middleware[i](handler)
 	}
+
 	return handler
 }
 
