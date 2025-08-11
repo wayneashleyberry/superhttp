@@ -18,33 +18,39 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/wayneashleyberry/superhttp"
 )
 
 func main() {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
+	middleware := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			slog.InfoContext(r.Context(), r.Method+" "+r.URL.Path,
+				slog.String("remote_addr", r.RemoteAddr),
+			)
+			next.ServeHTTP(w, r)
+		})
+	}
+
 	r := superhttp.NewServeMux()
 
-	r.Use(middleware.Logger) // <--<< Logger should come before Recoverer
-	r.Use(middleware.Recoverer)
-
-	r.GET("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.GET("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(http.StatusText(http.StatusOK)))
-	}))
+	})
 
 	r.Group("/api", func(api *superhttp.ServeMux) {
-		api.Use(middleware.NoCache)
+		api.Use(middleware)
 
-		api.GET("/users/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.GET("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
 			pattern := superhttp.RoutePattern(r)
 			fmt.Fprintf(w, "Pattern: %s", pattern)
-
-			id := r.PathValue("id")
-			fmt.Fprintf(w, "ID: %s", id)
-		}))
+		})
 	})
 
 	http.ListenAndServe(":8080", r)
